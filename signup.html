@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Signup - Gym System</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="bg-image">
+  <div class="form-container">
+    <h2>Signup</h2>
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button onclick="signup()">Register</button>
+    <p>Already have an account? <a href="login.html">Login</a></p>
+  </div>
+
+  <!-- Firebase SDKs -->
+ <!-- ✅ Firebase version 8 -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+  <!-- Firebase Config -->
+  <script src="firebase/firebase-config.js"></script>
+
+  <!-- Signup Script -->
+  <script>
+    function signup() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then(() => {
+          alert("Signup successful!");
+          window.location.href = "dashboard.html";
+        })
+        .catch(error => {
+          alert(error.message);
+        });
+    }
+  </script>
+</body>
+</html>

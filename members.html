@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Members - Gym System</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="navbar">
+    
+    <h2>Member Management</h2>
+    <button onclick="goBack()">Back</button>
+  </div>
+
+  <div class="form-container">
+    <h3>Add New Member</h3>
+    <input type="text" id="memberName" placeholder="Member Name" required />
+    <input type="number" id="memberAge" placeholder="Age" required />
+    <input type="text" id="memberPlan" placeholder="Plan (e.g. Basic, Pro)" required />
+    <button onclick="addMember()">Add Member</button>
+  </div>
+
+  <div class="member-list">
+    <h3>Member List</h3>
+    <ul id="memberData"></ul>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <!-- ✅ Firebase version 8 -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+  <!-- Firebase Config -->
+  <script src="firebase/firebase-config.js"></script>
+
+  <!-- Members Script -->
+  <script>
+    const memberList = document.getElementById("memberData");
+
+    // Add member to Firestore
+    function addMember() {
+      const name = document.getElementById("memberName").value;
+      const age = document.getElementById("memberAge").value;
+      const plan = document.getElementById("memberPlan").value;
+
+      db.collection("members").add({ name, age, plan })
+        .then(() => {
+          alert("Member added!");
+          loadMembers();
+        })
+        .catch(err => alert("Error: " + err));
+    }
+
+    // Load members from Firestore
+    function loadMembers() {
+      memberList.innerHTML = "";
+      db.collection("members").get().then(snapshot => {
+        snapshot.forEach(doc => {
+          const member = doc.data();
+          const li = document.createElement("li");
+          li.textContent = `Name: ${member.name}, Age: ${member.age}, Plan: ${member.plan}`;
+          const delBtn = document.createElement("button");
+          delBtn.textContent = "Delete";
+          delBtn.onclick = () => deleteMember(doc.id);
+          li.appendChild(delBtn);
+          memberList.appendChild(li);
+        });
+      });
+    }
+
+    function deleteMember(id) {
+      db.collection("members").doc(id).delete().then(() => {
+        alert("Member deleted");
+        loadMembers();
+      });
+    }
+
+    function goBack() {
+      window.location.href = "dashboard.html";
+    }
+
+    // Load members on page load
+    window.onload = loadMembers;
+  
+ 
+</script>
+
+</body>
+</html>

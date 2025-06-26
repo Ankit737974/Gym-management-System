@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Plans - Gym System</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="navbar">
+    <h2>Membership Plan Management</h2>
+    <button onclick="goBack()">Back</button>
+  </div>
+
+  <div class="form-container">
+    <h3>Add New Plan</h3>
+    <input type="text" id="planName" placeholder="Plan Name (e.g. Pro)" required />
+    <input type="number" id="planPrice" placeholder="Price (₹)" required />
+    <input type="text" id="planDuration" placeholder="Duration (e.g. 1 Month)" required />
+    <button onclick="addPlan()">Add Plan</button>
+  </div>
+
+  <div class="member-list">
+    <h3>Available Plans</h3>
+    <ul id="planData"></ul>
+  </div>
+
+  <!-- ✅ Firebase version 8 -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+  <!-- Firebase Config -->
+  <script src="firebase/firebase-config.js"></script>
+
+  <!-- Plan Script -->
+  <script>
+    const planList = document.getElementById("planData");
+
+    // Add new plan
+    function addPlan() {
+      const name = document.getElementById("planName").value;
+      const price = document.getElementById("planPrice").value;
+      const duration = document.getElementById("planDuration").value;
+
+      db.collection("plans").add({ name, price, duration })
+        .then(() => {
+          alert("Plan added!");
+          loadPlans();
+        })
+        .catch(err => alert("Error: " + err));
+    }
+
+    // Load all plans
+    function loadPlans() {
+      planList.innerHTML = "";
+      db.collection("plans").get().then(snapshot => {
+        snapshot.forEach(doc => {
+          const plan = doc.data();
+          const li = document.createElement("li");
+          li.textContent = `${plan.name} - ₹${plan.price} - ${plan.duration}`;
+          const delBtn = document.createElement("button");
+          delBtn.textContent = "Delete";
+          delBtn.onclick = () => deletePlan(doc.id);
+          li.appendChild(delBtn);
+          planList.appendChild(li);
+        });
+      });
+    }
+
+    function deletePlan(id) {
+      db.collection("plans").doc(id).delete().then(() => {
+        alert("Plan deleted");
+        loadPlans();
+      });
+    }
+
+    function goBack() {
+      window.location.href = "dashboard.html";
+    }
+
+    window.onload = loadPlans;
+  </script>
+</body>
+</html>

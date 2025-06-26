@@ -1,0 +1,283 @@
+/* === Global Styles === */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(to right, #f0f0f0, #fafafa);
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+h2, h3 {
+  color: #222;
+  margin-bottom: 15px;
+}
+
+/* === Navbar === */
+.navbar {
+  background: #111;
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+  backdrop-filter: blur(10px);
+}
+
+.navbar button {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.navbar button:hover {
+  background: #e60000;
+}
+
+/* === Form Container === */
+.form-container {
+  max-width: 400px;
+  margin: 30px auto;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.525);
+  box-shadow: 0 0 20px rgba(11, 0, 0, 0.4);
+  border-radius: 10px;
+}
+
+.form-container input, 
+.form-container select {
+  width: 95%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  transition: 0.3s;
+}
+
+.form-container input:focus, 
+.form-container select:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.form-container button {
+  width: 100%;
+  padding: 10px;
+  background: #28a745;
+  color: white;
+  border: none;
+  margin-top: 10px;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+
+.form-container button:hover {
+  background: #218838;
+}
+
+/* === Dashboard Cards === */
+.dashboard {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  padding: 30px;
+  width: 200px;
+  text-align: center;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  background: #f8f9fa;
+}
+
+/* === Lists === */
+.member-list ul,
+#memberData,
+#planData,
+#attendanceList,
+#paymentList {
+  list-style: none;
+  padding: 0 20px;
+}
+
+.member-list li {
+  background: #f1f1f1;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-left: 5px solid #007bff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 6px;
+}
+
+.member-list li button {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.member-list li button:hover {
+  background: #bd2130;
+}
+
+/* === Responsive === */
+@media (max-width: 600px) {
+  .cards {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card {
+    width: 90%;
+  }
+}
+
+/* === Background Gym Image === */
+.bg-image {
+  background: url('../images/background.jpg') no-repeat center center fixed;
+  background-size: cover;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form-container-glass {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 30px 25px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+  color: #fff;
+}
+
+.form-container-glass input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.form-container-glass button {
+  width: 100%;
+  padding: 12px;
+  background-color: #28a745;
+  color: white;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.form-container-glass button:hover {
+  background-color: #218838;
+}
+
+
+.banner img {
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: cover;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.card img.icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ========== RESPONSIVE STYLES ========== */
+
+/* Medium Devices: Tablets (portrait & landscape) */
+@media (max-width: 1024px) {
+  .card {
+    width: 45%;
+  }
+
+  .banner-text h1 {
+    font-size: 42px;
+  }
+
+  .navbar h2 {
+    font-size: 26px;
+  }
+}
+
+/* Small Devices: Mobile Phones */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .dashboard {
+    padding: 30px 10px;
+  }
+
+  .cards {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card {
+    width: 90%;
+  }
+
+  .form-container,
+  .form-container-glass {
+    width: 95%;
+    padding: 20px;
+  }
+
+  .form-container input,
+  .form-container-glass input {
+    font-size: 16px;
+  }
+
+  .banner-text h1 {
+    font-size: 32px;
+  }
+
+  #theme-toggle {
+    margin-top: 10px;
+  }
+}

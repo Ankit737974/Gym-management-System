@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attendance - Gym System</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="navbar">
+    
+    <h2>Attendance Tracking</h2>
+    <button onclick="goBack()">Back</button>
+  </div>
+
+  <div class="form-container">
+    <h3>Mark Attendance</h3>
+    <select id="memberSelect"></select>
+    <button onclick="markAttendance()">Mark Present</button>
+  </div>
+
+  <div class="member-list">
+    <h3>Attendance Records</h3>
+    <ul id="attendanceList"></ul>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <!-- ✅ Firebase version 8 -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+  <!-- Firebase Config -->
+  <script src="firebase/firebase-config.js"></script>
+
+  <!-- Attendance Script -->
+  <script>
+    const memberSelect = document.getElementById("memberSelect");
+    const attendanceList = document.getElementById("attendanceList");
+
+    // Load members into dropdown
+    function loadMembers() {
+      db.collection("members").get().then(snapshot => {
+        snapshot.forEach(doc => {
+          const member = doc.data();
+          const option = document.createElement("option");
+          option.value = doc.id;
+          option.textContent = member.name;
+          memberSelect.appendChild(option);
+        });
+      });
+    }
+
+    // Mark attendance
+    function markAttendance() {
+      const memberId = memberSelect.value;
+      const date = new Date().toISOString().split("T")[0];
+
+      db.collection("attendance").add({ memberId, date })
+        .then(() => {
+          alert("Attendance marked!");
+          loadAttendance();
+        })
+        .catch(err => alert("Error: " + err));
+    }
+
+    // Load attendance records
+    function loadAttendance() {
+      attendanceList.innerHTML = "";
+      db.collection("attendance").get().then(snapshot => {
+        snapshot.forEach(doc => {
+          const att = doc.data();
+          db.collection("members").doc(att.memberId).get().then(memberDoc => {
+            const name = memberDoc.data()?.name || "Unknown";
+            const li = document.createElement("li");
+            li.textContent = `${name} - ${att.date}`;
+            attendanceList.appendChild(li);
+          });
+        });
+      });
+    }
+
+    function goBack() {
+      window.location.href = "dashboard.html";
+    }
+
+    window.onload = () => {
+      loadMembers();
+      loadAttendance();
+    };
+  
+ 
+</script>
+
+</body>
+</html>
