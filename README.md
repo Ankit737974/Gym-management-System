@@ -28,6 +28,8 @@ This is a complete web-based **Gym Management System** built using **HTML, CSS, 
 - Firebase Firestore (database)
 - Firebase Hosting
 
+## 🚀 Live Demo
+🔗 [Click here to view the live site](https://gym-management-system-c276b.web.app)
 
 ## 📁 Folder Structure
 
@@ -38,3 +40,16 @@ This is a complete web-based **Gym Management System** built using **HTML, CSS, 
 📁 images/ → Icons, banners, background
 📁 firebase/ → Firebase config and auth guard
 📄 index.html → Gym homepage
+
+
+
+## 📸 Screenshots
+<img width="1876" height="851" alt="Screenshot 2025-07-12 124015" src="https://github.com/user-attachments/assets/d644df03-cd81-4f83-9967-24e462ed971a" />
+
+
+## ✍️ Author
+**Ankit Kumar**  
+Internship Project – [Unified Mentor]  
+April 2025 – July 2025
+
+
