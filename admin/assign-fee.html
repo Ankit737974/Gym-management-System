@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Assign Fee Package - Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: url('../images/billing-bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+    }
+    .container {
+      max-width: 500px;
+      margin: 60px auto;
+      background: rgba(255,255,255,0.95);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.2);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #27ae60;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #219150;
+    }
+    .navbar {
+      background: #111;
+      color: white;
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .navbar h2 { margin: 0; font-size: 22px; }
+    .navbar button {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 6px 10px;
+    }
+    .navbar button:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<div class="navbar">
+  <h2>Assign Fee</h2>
+  <button onclick="location.href='../dashboard.html'">← Back</button>
+</div>
+
+<div class="container">
+  <h2>Assign Fee Package</h2>
+
+  <select id="memberSelect">
+    <option value="">Select Member</option>
+  </select>
+
+  <input type="text" id="planName" placeholder="Plan Name (e.g. Gold Package)" />
+  <input type="number" id="planAmount" placeholder="Amount ₹" />
+  <input type="text" id="month" placeholder="Month (e.g. July 2025)" />
+
+  <button onclick="assignFee()">Assign Package</button>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="../firebase/firebase-config.js"></script>
+
+<script>
+  const db = firebase.firestore();
+  const memberSelect = document.getElementById("memberSelect");
+
+  // Load members with UID into dropdown
+  db.collection("members").get().then(snapshot => {
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const option = document.createElement("option");
+      option.value = data.uid; // ✅ Use UID for memberId
+      option.textContent = data.name;
+      memberSelect.appendChild(option);
+    });
+  });
+
+  function assignFee() {
+    const memberId = memberSelect.value;
+    const planName = document.getElementById("planName").value.trim();
+    const planAmount = document.getElementById("planAmount").value.trim();
+    const month = document.getElementById("month").value.trim();
+
+    if (!memberId || !planName || !planAmount || !month) {
+      alert("Please fill all fields.");
+      return;
+    }
+
+    const memberName = memberSelect.options[memberSelect.selectedIndex].textContent;
+
+    db.collection("fee_packages").add({
+      memberId,
+      plan: planName,
+      amount: Number(planAmount),
+      month,
+      assignedAt: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(() => {
+      return db.collection("notifications").add({
+        memberId,
+        message: `A new fee plan '${planName}' has been assigned for ${month}.`,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        read: false
+      });
+    })
+    .then(() => {
+      return db.collection("bills").add({
+        memberId,
+        memberName,
+        amount: Number(planAmount),
+        month,
+        dueDate: null,
+        status: "Assigned",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    })
+    .then(() => {
+      alert("Fee assigned, notification sent, and receipt created.");
+      // Clear form
+      memberSelect.selectedIndex = 0;
+      document.getElementById("planName").value = "";
+      document.getElementById("planAmount").value = "";
+      document.getElementById("month").value = "";
+    })
+    .catch((error) => {
+      console.error("Error assigning fee:", error);
+      alert("Error occurred while assigning fee.");
+    });
+  }
+</script>
+
+</body>
+</html>

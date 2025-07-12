@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Notifications - Member</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: url('../images/background.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+    }
+
+    .navbar {
+      background: #111;
+      color: white;
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .navbar .back-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 6px 10px;
+    }
+
+    .navbar .back-btn:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 60px auto;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .notif {
+      background: #f9f9f9;
+      border-left: 4px solid #27ae60;
+      padding: 15px 20px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .notif time {
+      display: block;
+      font-size: 13px;
+      color: #888;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <h2>Notifications</h2>
+    <button class="back-btn" onclick="location.href='../dashboard.html'">← Back</button>
+  </div>
+
+  <div class="container">
+    <h2>Latest Alerts</h2>
+    <div id="notifList">Loading...</div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="../firebase/firebase-config.js"></script>
+
+  <script>
+    const db = firebase.firestore();
+    const notifList = document.getElementById("notifList");
+
+    firebase.auth().onAuthStateChanged(user => {
+      if (!user) return location.href = "../users/login.html";
+
+      db.collection("notifications")
+        .where("memberId", "==", user.uid)
+        .orderBy("timestamp", "desc")
+        .get()
+        .then(snapshot => {
+          notifList.innerHTML = "";
+          if (snapshot.empty) {
+            notifList.innerHTML = "<p>No notifications found.</p>";
+            return;
+          }
+
+          snapshot.forEach(doc => {
+            const { message, timestamp } = doc.data();
+            const timeText = timestamp?.toDate().toLocaleString() || '-';
+            const item = `
+              <div class="notif">
+                ${message}
+                <time>${timeText}</time>
+              </div>
+            `;
+            notifList.innerHTML += item;
+          });
+        })
+        .catch(err => {
+          console.error("Error loading notifications:", err);
+          notifList.innerHTML = "<p>Error loading notifications.</p>";
+        });
+    });
+  </script>
+
+</body>
+</html>

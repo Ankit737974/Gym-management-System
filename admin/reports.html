@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reports - Gym System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: url('../images/reports-bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .navbar {
+      background: #111;
+      color: white;
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .navbar button {
+      background: #ff4757;
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    }
+
+    .container h3 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    select, button {
+      padding: 10px;
+      margin: 8px 5px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #333;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <h2>Reports</h2>
+    <button onclick="window.location.href='../dashboard.html'">← Back</button>
+  </div>
+
+  <div class="container">
+    <h3>View and Export Reports</h3>
+
+    <select id="reportType">
+      <option value="members">Members</option>
+      <option value="payments">Payments</option>
+      <option value="attendance">Attendance</option>
+    </select>
+
+    <button onclick="loadData()">🔍 View</button>
+    <button onclick="exportCSV()">📄 Export CSV</button>
+    <button onclick="exportPDF()">🖨️ Export PDF</button>
+    <button onclick="printPreview()">🖨️ Print Preview</button>
+
+    <table id="reportTable">
+      <thead id="tableHead"></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="../firebase/firebase-config.js"></script>
+  <script src="../firebase/auth-guard.js"></script>
+
+  <script>
+    const db = firebase.firestore();
+    let currentData = [];
+
+    function loadData() {
+      const type = document.getElementById("reportType").value;
+      const head = document.getElementById("tableHead");
+      const body = document.getElementById("tableBody");
+
+      head.innerHTML = "";
+      body.innerHTML = "";
+      currentData = [];
+
+      if (type === "members") {
+        db.collection("members").get().then(snapshot => {
+          head.innerHTML = `<tr><th>Name</th><th>Age</th><th>Plan</th></tr>`;
+          snapshot.forEach(doc => {
+            const d = doc.data();
+            currentData.push([d.name, d.age, d.plan]);
+            body.innerHTML += `<tr><td>${d.name}</td><td>${d.age}</td><td>${d.plan}</td></tr>`;
+          });
+        });
+
+      } else if (type === "payments") {
+        head.innerHTML = `<tr><th>Member</th><th>Amount</th><th>Date</th></tr>`;
+        db.collection("payments").get().then(snapshot => {
+          snapshot.forEach(async (doc) => {
+            const d = doc.data();
+            let name = d.memberName;
+            if (!name && d.memberId) {
+              const mem = await db.collection("members").doc(d.memberId).get();
+              name = mem.exists ? mem.data().name : "Unknown";
+            }
+            currentData.push([name, d.amount, d.date]);
+            body.innerHTML += `<tr><td>${name}</td><td>${d.amount}</td><td>${d.date}</td></tr>`;
+          });
+        });
+
+      } else if (type === "attendance") {
+        head.innerHTML = `<tr><th>Member</th><th>Date</th></tr>`;
+        db.collection("attendance").get().then(snapshot => {
+          snapshot.forEach(async (doc) => {
+            const d = doc.data();
+            let name = d.memberName;
+            if (!name && d.memberId) {
+              const mem = await db.collection("members").doc(d.memberId).get();
+              name = mem.exists ? mem.data().name : "Unknown";
+            }
+            currentData.push([name, d.date]);
+            body.innerHTML += `<tr><td>${name}</td><td>${d.date}</td></tr>`;
+          });
+        });
+      }
+    }
+
+    function exportCSV() {
+      if (currentData.length === 0) {
+        alert("No data to export.");
+        return;
+      }
+
+      let csv = currentData.map(row => row.join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "report.csv";
+      link.click();
+    }
+
+    function exportPDF() {
+      if (currentData.length === 0) {
+        alert("No data to export.");
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text("Gym Report", 20, 10);
+      currentData.forEach((row, i) => {
+        doc.text(row.join(" | "), 20, 20 + i * 10);
+      });
+      doc.save("report.pdf");
+    }
+
+    function printPreview() {
+      if (currentData.length === 0) {
+        alert("No data to print.");
+        return;
+      }
+
+      const type = document.getElementById("reportType").value;
+      const title = `Gym Report - ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+      let html = `
+        <html>
+        <head>
+          <title>${title}</title>
+          <style>
+            body { font-family: 'Poppins', sans-serif; padding: 20px; }
+            h2 { text-align: center; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+            th { background: #333; color: white; }
+          </style>
+        </head>
+        <body>
+          <h2>${title}</h2>
+          <table><thead>${document.getElementById("tableHead").innerHTML}</thead><tbody>
+      `;
+
+      currentData.forEach(row => {
+        html += `<tr>${row.map(col => `<td>${col}</td>`).join("")}</tr>`;
+      });
+
+      html += `</tbody></table></body></html>`;
+
+      const win = window.open("", "", "height=800,width=1000");
+      win.document.write(html);
+      win.document.close();
+      win.print();
+    }
+  </script>
+
+</body>
+</html>

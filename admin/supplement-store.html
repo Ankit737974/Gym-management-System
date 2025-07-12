@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Supplement Store - Gym System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: url('../images/store-bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .navbar {
+      background: #111;
+      color: white;
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    }
+
+    .navbar h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .navbar button {
+      background: #ff4757;
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .container h3 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button.save-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: #17a2b8;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button.save-btn:hover {
+      background-color: #138496;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 25px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #333;
+      color: white;
+    }
+
+    .delete-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .delete-btn:hover {
+      background-color: #c82333;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <h2>Supplement Store</h2>
+    <button onclick="window.location.href='../dashboard.html'">← Back</button>
+  </div>
+
+  <div class="container">
+    <h3>Add Supplement to Store</h3>
+
+    <input type="text" id="supplementName" placeholder="Supplement Name" />
+    <input type="text" id="supplementType" placeholder="Type / Brand" />
+    <input type="number" id="price" placeholder="Price ₹" />
+    <input type="number" id="stock" placeholder="Stock Quantity" />
+
+    <button class="save-btn" onclick="addSupplement()">Add Supplement</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Price (₹)</th>
+          <th>Stock</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="supplementList">
+        <!-- Supplements will be loaded here -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="firebase/firebase-config.js"></script>
+
+  <script>
+    function addSupplement() {
+      const name = document.getElementById("supplementName").value.trim();
+      const type = document.getElementById("supplementType").value.trim();
+      const price = document.getElementById("price").value.trim();
+      const stock = document.getElementById("stock").value.trim();
+
+      if (!name || !type || !price || !stock) {
+        alert("Please fill all fields.");
+        return;
+      }
+
+      db.collection("supplement_store").add({
+        name,
+        type,
+        price: Number(price),
+        stock: Number(stock),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        alert("Supplement added successfully!");
+        document.getElementById("supplementName").value = "";
+        document.getElementById("supplementType").value = "";
+        document.getElementById("price").value = "";
+        document.getElementById("stock").value = "";
+        loadSupplements();
+      });
+    }
+
+    function deleteSupplement(id) {
+      if (confirm("Are you sure you want to delete this supplement?")) {
+        db.collection("supplement_store").doc(id).delete().then(() => {
+          alert("Deleted successfully!");
+          loadSupplements();
+        }).catch(err => {
+          console.error("Error deleting:", err);
+        });
+      }
+    }
+
+    function loadSupplements() {
+      const list = document.getElementById("supplementList");
+      list.innerHTML = "";
+
+      db.collection("supplement_store").orderBy("createdAt", "desc").get().then(snapshot => {
+        snapshot.forEach(doc => {
+          const d = doc.data();
+          const row = `
+            <tr>
+              <td>${d.name}</td>
+              <td>${d.type}</td>
+              <td>${d.price}</td>
+              <td>${d.stock}</td>
+              <td><button class="delete-btn" onclick="deleteSupplement('${doc.id}')">Delete</button></td>
+            </tr>`;
+          list.innerHTML += row;
+        });
+      });
+    }
+
+    window.onload = loadSupplements;
+  </script>
+
+</body>
+</html>

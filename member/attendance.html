@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Attendance - Gym System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: #f6f9fb;
+    }
+
+    .navbar {
+      background: #111;
+      color: white;
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .navbar button {
+      background: #ff4757;
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h3 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button.save-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: #00b894;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 25px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #2c3e50;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <h2>Attendance</h2>
+    <button onclick="window.location.href='../dashboard.html'">← Back</button>
+  </div>
+
+  <div class="container">
+    <h3>Mark Member Attendance</h3>
+
+    <select id="memberSelect">
+      <option value="">Select Member</option>
+    </select>
+
+    <input type="date" id="attendanceDate" />
+
+    <button class="save-btn" onclick="markAttendance()">Mark Attendance</button>
+
+    <h3>Recent Attendance</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Member</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="attendanceList"></tbody>
+    </table>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="../firebase/firebase-config.js"></script>
+  <script src="../firebase/auth-guard.js"></script>
+
+  <script>
+    const db = firebase.firestore();
+    const memberSelect = document.getElementById("memberSelect");
+    const attendanceList = document.getElementById("attendanceList");
+
+    // Load members into dropdown
+    db.collection("member").get().then(snapshot => {
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const option = document.createElement("option");
+        option.value = doc.id;
+        option.textContent = data.name;
+        memberSelect.appendChild(option);
+      });
+    });
+
+    function markAttendance() {
+      const memberId = memberSelect.value;
+      const date = document.getElementById("attendanceDate").value;
+
+      if (!memberId || !date) {
+        alert("Please select member and date.");
+        return;
+      }
+
+      db.collection("attendance").add({
+        memberId,
+        date,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        alert("Attendance marked!");
+        loadAttendance();
+      });
+    }
+
+    function loadAttendance() {
+      attendanceList.innerHTML = "";
+      db.collection("attendance").orderBy("createdAt", "desc").limit(20).get().then(snapshot => {
+        snapshot.forEach(async (doc) => {
+          const data = doc.data();
+          let name = data.memberName;
+          if (!name && data.memberId) {
+            const mem = await db.collection("member").doc(data.memberId).get();
+            name = mem.exists ? mem.data().name : "Unknown";
+          }
+          const row = `
+            <tr>
+              <td>${name}</td>
+              <td>${data.date}</td>
+            </tr>
+          `;
+          attendanceList.innerHTML += row;
+        });
+      });
+    }
+
+    // Load on page load
+    loadAttendance();
+  </script>
+
+</body>
+</html>

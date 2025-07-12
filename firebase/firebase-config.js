@@ -13,5 +13,4 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 // Optional (but recommended for easier use in other files)
-const auth = firebase.auth();
-const db = firebase.firestore();
+window.db = firebase.firestore();

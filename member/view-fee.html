@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Fee Plan - Member</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: url('../images/background.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+    }
+
+    .navbar {
+      background: #111;
+      color: white;
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .navbar .back-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 6px 10px;
+    }
+
+    .navbar .back-btn:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 60px auto;
+      background: rgba(255,255,255,0.95);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #27ae60;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <h2>My Fee Plan</h2>
+    <button class="back-btn" onclick="location.href='../dashboard.html'">← Back</button>
+  </div>
+
+  <div class="container">
+    <h2>Assigned Fee Plans</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Plan</th>
+          <th>Amount</th>
+          <th>Month</th>
+          <th>Assigned On</th>
+        </tr>
+      </thead>
+      <tbody id="feeList">
+        <tr><td colspan="4">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="../firebase/firebase-config.js"></script>
+
+  <script>
+    const db = firebase.firestore();
+    const feeList = document.getElementById("feeList");
+
+    firebase.auth().onAuthStateChanged(user => {
+      if (!user) return location.href = "../users/login.html";
+
+      db.collection("fee_packages")
+        .where("memberId", "==", user.uid)
+        .orderBy("assignedAt", "desc")
+        .get()
+        .then(snapshot => {
+          feeList.innerHTML = "";
+          if (snapshot.empty) {
+            feeList.innerHTML = "<tr><td colspan='4'>No fee plans assigned yet.</td></tr>";
+            return;
+          }
+
+          snapshot.forEach(doc => {
+            const { plan, amount, month, assignedAt } = doc.data();
+            const assignedDate = assignedAt?.toDate().toLocaleDateString() || "-";
+
+            const row = `
+              <tr>
+                <td>${plan}</td>
+                <td>₹${amount}</td>
+                <td>${month}</td>
+                <td>${assignedDate}</td>
+              </tr>
+            `;
+            feeList.innerHTML += row;
+          });
+        })
+        .catch(err => {
+          console.error("Error fetching fee plans:", err);
+          feeList.innerHTML = "<tr><td colspan='4'>Error loading data.</td></tr>";
+        });
+    });
+  </script>
+
+</body>
+</html>

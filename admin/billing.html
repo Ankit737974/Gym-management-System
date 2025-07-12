@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Generate Bill - Gym System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: url('../images/billing-bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .navbar {
+      background: #111;
+      color: white;
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    }
+
+    .navbar h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .navbar button {
+      background: #ff4757;
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 40px auto;
+      background: rgba(255,255,255,0.95);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
+    }
+
+    h3 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button.save-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: #27ae60;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button.save-btn:hover {
+      background-color: #1e8449;
+    }
+
+    .bill-output {
+      margin-top: 20px;
+      background: #ecf0f1;
+      padding: 20px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .bill-output p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <h2>Generate Bill</h2>
+    <button onclick="window.location.href='../dashboard.html'">← Back</button>
+  </div>
+
+  <div class="container">
+    <h3>Generate Member Bill</h3>
+
+    <select id="memberSelect">
+      <option value="">Select Member</option>
+    </select>
+
+    <input type="number" id="amount" placeholder="Enter Amount ₹" />
+    <input type="text" id="month" placeholder="Month (e.g. June 2025)" />
+    <input type="date" id="dueDate" />
+
+    <button class="save-btn" onclick="generateBill()">Generate Bill</button>
+
+    <div class="bill-output" id="billOutput">
+      <h4>Bill Generated:</h4>
+      <p><strong>Name:</strong> <span id="bName"></span></p>
+      <p><strong>Amount:</strong> ₹<span id="bAmount"></span></p>
+      <p><strong>Month:</strong> <span id="bMonth"></span></p>
+      <p><strong>Due Date:</strong> <span id="bDue"></span></p>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="../firebase/firebase-config.js"></script>
+  <script src="../firebase/auth-guard.js"></script>
+
+  <script>
+    const db = firebase.firestore();
+    const memberSelect = document.getElementById("memberSelect");
+
+    // Load members from Firestore into dropdown
+    db.collection("members").orderBy("name").get().then(snapshot => {
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const option = document.createElement("option");
+        option.value = doc.id;
+        option.textContent = data.name;
+        memberSelect.appendChild(option);
+      });
+    }).catch(err => {
+      console.error("Error loading members:", err);
+      alert("Failed to load members.");
+    });
+
+    function generateBill() {
+      const memberId = memberSelect.value;
+      const amount = document.getElementById("amount").value.trim();
+      const month = document.getElementById("month").value.trim();
+      const dueDate = document.getElementById("dueDate").value.trim();
+
+      if (!memberId || !amount || !month || !dueDate) {
+        alert("Please fill all fields.");
+        return;
+      }
+
+      const selectedOption = memberSelect.options[memberSelect.selectedIndex];
+      const memberName = selectedOption.textContent;
+
+      // Save bill to Firestore
+      db.collection("bills").add({
+        memberId,
+        memberName,
+        amount: Number(amount),
+        month,
+        dueDate,
+        status: "Unpaid",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        // ✅ Add Notification
+        return db.collection("notifications").add({
+          memberId,
+          message: `Your bill for ${month} has been generated.`,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          read: false
+        });
+      }).then(() => {
+        // ✅ Show Bill Details
+        document.getElementById("bName").textContent = memberName;
+        document.getElementById("bAmount").textContent = amount;
+        document.getElementById("bMonth").textContent = month;
+        document.getElementById("bDue").textContent = dueDate;
+        document.getElementById("billOutput").style.display = "block";
+        alert("Bill generated and notification sent.");
+      }).catch((error) => {
+        console.error("Error generating bill:", error);
+        alert("Something went wrong.");
+      });
+    }
+  </script>
+
+</body>
+</html>

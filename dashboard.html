@@ -4,9 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dashboard - Gym System</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     body {
       margin: 0;
@@ -27,8 +26,6 @@
     .navbar h2 {
       font-family: 'Bebas Neue', cursive;
       font-size: 32px;
-      letter-spacing: 1px;
-      color: aliceblue;
       margin: 0;
     }
 
@@ -40,11 +37,6 @@
       border-radius: 6px;
       font-size: 14px;
       cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    .navbar button:hover {
-      background: #e84118;
     }
 
     .banner {
@@ -73,7 +65,6 @@
       font-family: 'Bebas Neue', cursive;
       font-size: 48px;
       letter-spacing: 2px;
-      margin: 0;
     }
 
     .dashboard {
@@ -130,43 +121,75 @@
   </style>
 </head>
 <body>
-  <div class="navbar">
 
+  <div class="navbar">
     <h2>Gym Management System</h2>
     <button onclick="logout()">Logout</button>
-    
-
-
   </div>
 
-  <!-- Banner with overlay text -->
   <div class="banner">
-    <img src="images/banner.jpg" alt="Gym Banner" />
+    <img src="../images/banner.jpg" alt="Gym Banner" />
     <div class="banner-text">
       <h1>Transform Your Fitness</h1>
     </div>
   </div>
 
-  <!-- Dashboard Content -->
   <div class="dashboard">
-    <h3>Welcome to Your Admin Dashboard</h3>
+    <h3>Welcome to Your Dashboard</h3>
 
     <div class="cards">
-      <div class="card" onclick="location.href='members.html'">
-        <img src="images/member-icon.png" alt="Members" />
+      <!-- Shared cards -->
+      <div class="card" id="membersCard" onclick="location.href='../admin/members.html'">
+        <img src="../images/member-icon.png" alt="Members" />
         Manage Members
       </div>
-      <div class="card" onclick="location.href='plans.html'">
-        <img src="images/plan-icon.png" alt="Plans" />
+      <div class="card" id="plansCard" onclick="location.href='../member/plans.html'">
+        <img src="../images/plan-icon.png" alt="Plans" />
         Manage Plans
       </div>
-      <div class="card" onclick="location.href='attendance.html'">
-        <img src="images/attendance-icon.png" alt="Attendance" />
+      <div class="card" id="attendanceCard" onclick="location.href='../member/attendance.html'">
+        <img src="../images/attendance-icon.png" alt="Attendance" />
         Track Attendance
       </div>
-      <div class="card" onclick="location.href='payments.html'">
-        <img src="images/payment-icon.png" alt="Payments" />
+      <div class="card" id="paymentsCard" onclick="location.href='../member/payments.html'">
+        <img src="../images/payment-icon.png" alt="Payments" />
         Payments
+      </div>
+
+      <!-- Admin Only -->
+      <div class="card" id="billingCard" onclick="location.href='admin/billing.html'">
+        <img src="../images/billing-icon.png" alt="Billing" />
+        Billing
+      </div>
+      <div class="card" id="dietCard" onclick="location.href='admin/diet.html'">
+        <img src="../images/diet-icon.png" alt="Diet" />
+        Diet Plans
+      </div>
+      <div class="card" id="supplementCard" onclick="location.href='admin/supplement.html'">
+        <img src="../images/supplement-icon.png" alt="Supplement" />
+        Supplement Plans
+      </div>
+      <div class="card" id="storeCard" onclick="location.href='admin/supplement-store.html'">
+        <img src="../images/store-icon.png" alt="Store" />
+        Supplement Store
+      </div>
+      <div class="card" id="reportsCard" onclick="location.href='admin/reports.html'">
+        <img src="../images/reports-icon.png" alt="Reports" />
+        Reports
+      </div>
+      <div class="card" id="assignFeeCard" onclick="location.href='admin/assign-fee.html'">
+        💰 Assign Fee
+      </div>
+
+      <!-- Member Only -->
+      <div class="card" id="notificationCard" onclick="location.href='../member/notifications.html'">
+        🔔 Notifications
+      </div>
+      <div class="card" id="receiptCard" onclick="location.href='../member/receipts.html'">
+        🧾 My Receipts
+      </div>
+      <div class="card" id="feeCard" onclick="location.href='../member/view-fee.html'">
+        💼 My Fee Plans
       </div>
     </div>
   </div>
@@ -174,19 +197,40 @@
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="firebase/firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="../firebase/firebase-config.js"></script>
+  <script src="../firebase/auth-guard.js"></script>
 
   <script>
     function logout() {
       firebase.auth().signOut().then(() => {
-        alert("Logged out!");
-        window.location.href = "login.html";
+        alert("Logged out successfully.");
+        window.location.href = "../users/login.html";
       });
     }
-  
-  
 
-</script>
+    firebase.auth().onAuthStateChanged(async (user) => {
+      if (!user) return window.location.href = "../users/login.html";
+
+      const doc = await firebase.firestore().collection("users").doc(user.uid).get();
+      const role = doc.exists ? doc.data().role : null;
+
+      if (role === "admin") {
+        // Hide member-only cards
+        document.getElementById("notificationCard").style.display = "none";
+        document.getElementById("receiptCard").style.display = "none";
+        document.getElementById("feeCard").style.display = "none";
+      } else if (role === "member") {
+        // Hide admin-only cards
+        document.getElementById("billingCard").style.display = "none";
+        document.getElementById("dietCard").style.display = "none";
+        document.getElementById("supplementCard").style.display = "none";
+        document.getElementById("storeCard").style.display = "none";
+        document.getElementById("reportsCard").style.display = "none";
+        document.getElementById("assignFeeCard").style.display = "none";
+      }
+    });
+  </script>
 
 </body>
 </html>

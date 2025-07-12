@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Diet Plan - Gym System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: url('../images/diet-bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .navbar {
+      background: #111;
+      color: white;
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    }
+
+    .navbar h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .navbar button {
+      background: #ff4757;
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 40px auto;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.15);
+    }
+
+    h3 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button.save-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: #6c5ce7;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button.save-btn:hover {
+      background-color: #4b3fd1;
+    }
+
+    .diet-output {
+      background: #f1f1f1;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .diet-output p {
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <h2>Assign Diet Plan</h2>
+    <button onclick="window.location.href='../dashboard.html'">← Back</button>
+  </div>
+
+  <div class="container">
+    <h3>Assign Diet to Member</h3>
+
+    <select id="memberSelect">
+      <option value="">Select Member</option>
+    </select>
+
+    <textarea id="dietText" rows="6" placeholder="Enter diet plan... (e.g. Protein breakfast, Post-workout shake, Chicken at night...)"></textarea>
+
+    <button class="save-btn" onclick="assignDiet()">Save Diet Plan</button>
+
+    <div class="diet-output" id="dietBox">
+      <h4>Latest Diet Plan:</h4>
+      <p id="dietOutput"></p>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="../firebase/firebase-config.js"></script>
+  <script src="../firebase/auth-guard.js"></script>
+
+  <script>
+    const memberSelect = document.getElementById("memberSelect");
+
+    // Load members
+    db.collection("members").get().then(snapshot => {
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const option = document.createElement("option");
+        option.value = doc.id;
+        option.textContent = data.name;
+        memberSelect.appendChild(option);
+      });
+    });
+
+    function assignDiet() {
+      const memberId = memberSelect.value;
+      const dietText = document.getElementById("dietText").value.trim();
+
+      if (!memberId || !dietText) {
+        alert("Please fill all fields.");
+        return;
+      }
+
+      db.collection("diet_plans").add({
+        memberId,
+        dietText,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        document.getElementById("dietOutput").textContent = dietText;
+        document.getElementById("dietBox").style.display = "block";
+        document.getElementById("dietText").value = "";
+      });
+    }
+  </script>
+
+</body>
+</html>

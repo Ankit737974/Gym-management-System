@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Receipts - Member</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: url('../images/billing-bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+    }
+    .container {
+      max-width: 700px;
+      margin: 50px auto;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.2);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #ccc;
+    }
+    th {
+      background-color: #27ae60;
+      color: white;
+    }
+    .navbar {
+      background: #111;
+      color: white;
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .navbar h2 { margin: 0; font-size: 22px; }
+    .navbar button {
+      background: #e74c3c;
+      border: none;
+      padding: 8px 14px;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="navbar">
+  <h2>My Receipts</h2>
+  <button onclick="location.href='../dashboard.html'">← Back</button>
+</div>
+
+<div class="container">
+  <h2>Bill Receipts</h2>
+
+  <table id="receiptTable">
+    <thead>
+      <tr>
+        <th>Month</th>
+        <th>Amount</th>
+        <th>Status</th>
+        <th>Issued On</th>
+      </tr>
+    </thead>
+    <tbody id="receiptBody">
+      <!-- Bills will be inserted here -->
+    </tbody>
+  </table>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="../firebase/firebase-config.js"></script>
+
+<script>
+  const db = firebase.firestore();
+
+  firebase.auth().onAuthStateChanged(user => {
+    if (!user) return location.href = "../users/login.html";
+
+    db.collection("bills")
+      .where("memberId", "==", user.uid)
+      .orderBy("createdAt", "desc")
+      .get()
+      .then(snapshot => {
+        const tbody = document.getElementById("receiptBody");
+        if (snapshot.empty) {
+          tbody.innerHTML = "<tr><td colspan='4'>No receipts found.</td></tr>";
+          return;
+        }
+
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const issuedDate = data.createdAt?.toDate().toLocaleDateString() || '-';
+
+          const row = `
+            <tr>
+              <td>${data.month}</td>
+              <td>₹${data.amount}</td>
+              <td>${data.status || 'Assigned'}</td>
+              <td>${issuedDate}</td>
+            </tr>
+          `;
+          tbody.innerHTML += row;
+        });
+      });
+  });
+</script>
+
+</body>
+</html>

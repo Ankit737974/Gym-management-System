@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Assign Supplements - Gym System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: url('../images/supplement-bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .navbar {
+      background: #111;
+      color: white;
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    }
+
+    .navbar h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .navbar button {
+      background: #ff4757;
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 40px auto;
+      background: rgba(255,255,255,0.95);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
+    }
+
+    h3 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button.save-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: #0984e3;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button.save-btn:hover {
+      background-color: #0652dd;
+    }
+
+    .output-box {
+      margin-top: 20px;
+      background: #ecf0f1;
+      padding: 15px;
+      border-radius: 8px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <h2>Assign Supplement</h2>
+    <button onclick="window.location.href='../dashboard.html'">← Back</button>
+  </div>
+
+  <div class="container">
+    <h3>Assign Supplement to Member</h3>
+
+    <select id="memberSelect">
+      <option value="">Select Member</option>
+    </select>
+
+    <input type="text" id="supplement" placeholder="Supplement Name" />
+    <input type="text" id="dose" placeholder="Dosage Instructions" />
+
+    <button class="save-btn" onclick="assignSupplement()">Assign Supplement</button>
+
+    <div class="output-box" id="outputBox">
+      <p><strong>Supplement Assigned!</strong></p>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="../firebase/firebase-config.js"></script>
+  <script src="../firebase/auth-guard.js"></script>
+
+  <script>
+    const memberSelect = document.getElementById("memberSelect");
+
+    db.collection("members").get().then(snapshot => {
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const option = document.createElement("option");
+        option.value = doc.id;
+        option.textContent = data.name;
+        memberSelect.appendChild(option);
+      });
+    });
+
+    function assignSupplement() {
+      const memberId = memberSelect.value;
+      const supplement = document.getElementById("supplement").value.trim();
+      const dose = document.getElementById("dose").value.trim();
+
+      if (!memberId || !supplement || !dose) {
+        alert("Please fill all fields.");
+        return;
+      }
+
+      db.collection("supplements_assigned").add({
+        memberId,
+        supplement,
+        dose,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        document.getElementById("outputBox").style.display = "block";
+        document.getElementById("supplement").value = "";
+        document.getElementById("dose").value = "";
+      });
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Search Member - FitLife Gym</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: url('../images/background.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+    }
+
+    .overlay {
+      background-color: rgba(0, 0, 0, 0.75);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    .search-box {
+      max-width: 500px;
+      margin: auto;
+      display: flex;
+      gap: 10px;
+    }
+
+    .search-box input {
+      flex: 1;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+    }
+
+    .search-box button {
+      padding: 12px 20px;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .search-box button:hover {
+      background-color: #1e8449;
+    }
+
+    .results {
+      margin-top: 30px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    .card p {
+      margin: 6px 0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #ccc;
+      font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .search-box {
+        flex-direction: column;
+      }
+
+      .search-box button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="overlay">
+    <h2>Search Gym Members</h2>
+
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search by name, email, or mobile..." />
+      <button onclick="searchMembers()">Search</button>
+    </div>
+
+    <div class="results" id="results"></div>
+  </div>
+
+  <footer>
+    🔍 FitLife Gym Public Search Page | 📍 Kailash Institute
+  </footer>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="../firebase/firebase-config.js"></script>
+
+  <script>
+    const db = firebase.firestore();
+
+    function searchMembers() {
+      const query = document.getElementById("searchInput").value.toLowerCase();
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
+
+      if (!query) {
+        resultsDiv.innerHTML = "<p style='text-align:center;'>Please enter a search keyword.</p>";
+        return;
+      }
+
+      db.collection("members").get().then(snapshot => {
+        let found = 0;
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const name = data.name?.toLowerCase() || "";
+          const email = data.email?.toLowerCase() || "";
+          const phone = data.phone?.toString() || "";
+
+          if (name.includes(query) || email.includes(query) || phone.includes(query)) {
+            found++;
+            resultsDiv.innerHTML += `
+              <div class="card">
+                <p><strong>Name:</strong> ${data.name || '-'}</p>
+                <p><strong>Email:</strong> ${data.email || '-'}</p>
+                <p><strong>Phone:</strong> ${data.phone || '-'}</p>
+                <p><strong>Gender:</strong> ${data.gender || '-'}</p>
+                <p><strong>Plan:</strong> ${data.plan || '-'}</p>
+              </div>
+            `;
+          }
+        });
+
+        if (found === 0) {
+          resultsDiv.innerHTML = "<p style='text-align:center;'>No matching member found.</p>";
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>
