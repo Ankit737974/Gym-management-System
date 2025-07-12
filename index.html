@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FitLife Gym - Welcome</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: url('../images/background.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+    }
+
+    header {
+      background: rgba(0, 0, 0, 0.85);
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 20px;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    nav a:hover {
+      color: #ff6b6b;
+    }
+
+    .overlay {
+      background-color: rgba(0, 0, 0, 0.75);
+      min-height: 100vh;
+      padding: 60px 20px 30px;
+      text-align: center;
+    }
+
+    .hero {
+      max-width: 850px;
+      margin: auto;
+      padding: 40px 20px;
+      animation: fadeInUp 1s ease-out;
+    }
+
+    .hero h2 {
+      font-size: 44px;
+      margin-bottom: 20px;
+    }
+
+    .hero p {
+      font-size: 18px;
+      margin-bottom: 30px;
+    }
+
+    .buttons button {
+      margin: 10px;
+      padding: 14px 28px;
+      font-size: 16px;
+      background-color: #27ae60;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .buttons button:hover {
+      background-color: #1e8449;
+    }
+
+    .services {
+      margin-top: 40px;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      max-width: 650px;
+      margin-left: auto;
+      margin-right: auto;
+      animation: fadeIn 1.5s ease;
+    }
+
+    .services h3 {
+      font-size: 26px;
+      margin-bottom: 15px;
+      color: #ffdfdf;
+    }
+
+    .services ul {
+      list-style: none;
+      padding: 0;
+      font-size: 16px;
+    }
+
+    .services li {
+      margin: 8px 0;
+    }
+
+    footer {
+      background: rgba(0,0,0,0.9);
+      padding: 20px;
+      text-align: center;
+      font-size: 14px;
+      color: #ccc;
+      margin-top: 60px;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      nav {
+        margin-top: 10px;
+      }
+
+      .hero h2 {
+        font-size: 32px;
+      }
+
+      .buttons button {
+        width: 100%;
+        margin: 10px 0;
+      }
+
+      .services {
+        padding: 20px;
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 🔝 Header -->
+  <header>
+    <h1>🏋️ FitLife Gym</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="search.html">Search</a>
+      <a href="login.html">Login</a>
+      <a href="signup.html">Sign Up</a>
+    </nav>
+  </header>
+
+  <!-- 🔻 Page Overlay Content -->
+  <div class="overlay">
+
+    <!-- 💬 Hero Welcome Section -->
+    <div class="hero">
+      <h2>Welcome to FitLife Gym</h2>
+      <p>Your fitness journey starts here. Join us and take control of your workouts, diet, and health goals.</p>
+      <div class="buttons">
+        <button onclick="location.href='users/signup.html'">Sign Up</button>
+        <button onclick="location.href='users/login.html'">Login</button>
+        <button onclick="location.href='users/search.html'">🔍 Search Member Records</button>
+      </div>
+    </div>
+
+    <!-- 💡 Services Section -->
+    <div class="services">
+      <h3>Our Services</h3>
+      <ul>
+        <li>💪 Personal & Group Training</li>
+        <li>🥗 Nutrition & Diet Plans</li>
+        <li>🏋️ Strength & Cardio Programs</li>
+        <li>🛒 Supplement Store Access</li>
+        <li>📊 Member Progress & Reports</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- 📞 Footer -->
+  <footer>
+      Ankit Kumar GYM | 📞 7379747238 | 📧 ak3285540@gmail.com
+  </footer>
+
+</body>
+</html>
