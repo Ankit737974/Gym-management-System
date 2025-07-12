@@ -1,19 +1,40 @@
-# Gym-management-System
-A full-featured, responsive web application for managing gym operations — built using HTML, CSS, JavaScript, and Firebase. This project was developed as part of an internship to showcase real-world frontend + backend integration using modern web technologies
+# 🏋️‍♂️ Gym Management System
 
-🔧 Features
-✅ User Authentication (Signup/Login using Firebase Auth)
+This is a complete web-based **Gym Management System** built using **HTML, CSS, JavaScript**, and **Firebase**. It helps gym owners manage members, plans, attendance, billing, diet, supplements, and more.
 
-👥 Member Management (Add, view, and delete gym members)
+## 📌 Features
 
-💳 Plan Management (Manage gym plans with price and duration)
+### 👤 Admin Panel
+- Add / update / delete members
+- Assign fee packages and generate bills
+- View reports, diet plans, and supplement details
+- Export reports
+- Manage supplement store inventory
+- Send notifications to members
 
-📆 Attendance Tracking (Mark and view attendance records)
+### 👥 Member Panel
+- Login securely
+- View assigned fee plans
+- Get bill notifications
+- View fee receipts
 
-💰 Payment Records (Log member payments with amount and date)
+### 🌐 Public/User Section
+- View gym services and basic info
+- Search members and check records (based on permission)
 
-🎨 Responsive UI (Works perfectly on mobile, tablet, and desktop)
+## 🛠️ Technologies Used
+- HTML5, CSS3, JavaScript
+- Firebase Authentication
+- Firebase Firestore (database)
+- Firebase Hosting
 
-🌗 Dark Mode (Toggle between light and dark themes)
 
-🖼️ Gym-Themed Design with animated dashboard and image assets
+## 📁 Folder Structure
+
+📁 admin/ → Admin dashboard and tools
+📁 member/ → Member features and access
+📁 users/ → Login, Signup, Public access
+📁 css/ → Shared styles
+📁 images/ → Icons, banners, background
+📁 firebase/ → Firebase config and auth guard
+📄 index.html → Gym homepage
